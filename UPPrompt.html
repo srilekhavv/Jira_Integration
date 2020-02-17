@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <h2>Enter Credentials</h2>
+    <form action="">
+    
+    <script>
+    function updateInfo(form) {
+    google.script.run.credentials(form.userid.value, form.psw.value);
+    google.script.host.close();
+    }
+    </script>
+    
+    Username:<br>
+    <input type="text" name="userid">
+    <br>
+    Password:<br>
+    <input type="password" name="psw">
+    <br>
+    <input type="button" value="OK" onclick="updateInfo(this.form)" /> <input type="button" value="Cancel" onclick="google.script.host.close()" />
+    </form>
+    
+  </body>
+</html>
+
+

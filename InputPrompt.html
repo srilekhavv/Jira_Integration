@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <h2>Get Data</h2>
+    <h2>Inputs:</h2>
+    <form action="">
+    
+    <script>
+    function updateInfo(form) {
+    google.script.run.GetData3(form.sheet.value, form.row.value, form.col.value, form.filter.value, form.query.value, form.startAt.value, form.maxResults.value, form.options.value);
+    google.script.host.close();
+    }
+    </script>
+    
+    Sheet (e.g. Sheet1):<br>
+    <input type="text" name="sheet">
+    <br>
+    Cell Row:<br>
+    <input type="text" name="row">
+    <br>
+    Cell Column (type in the letter e.g. A):<br>
+    <input type="text" name="col">
+    <br>
+    Filter (type in the filter number):<br>
+    <input type="text" name="filter">
+    <br>
+    Query (e.g. /issues/key):<br>
+    <input type="text" name="query">
+    <br>
+    Start At:<br>
+    <input type="text" name="startAt">
+    <br>
+    Max Results (please do not set the max results to a number over 100):<br>
+    <input type="text" name="maxResults">
+    <br>
+    Options (e.g. noInherit,noTruncate):<br>
+    <input type="text" name="options">
+    <br>
+    <input type="button" value="OK" onclick="updateInfo(this.form)" /> <input type="button" value="Cancel" onclick="google.script.host.close()" />
+    </form>
+    
+  </body>
+</html>
+
+
+
