@@ -1,0 +1,44 @@
+Srilekha Vutukuru
+Creating Jira Issues Through Google Sheets for Black Duck
+Steps:
+Once you open the Automated Black Duck Spreadsheet, you will notice that there is a BDuck Analysis menu. Click on that and you will see that there are 4 options. To create the jira issue, the 2 important ones you need to know are “Enter Your Jira Credentials” and “Create Jira Issue.”
+First thing you have to do is click on “Enter Your Jira Credentials,” and enter your Jira username and password.
+On the sheet that says “Summary” select the project you want to create a Jira for using the drop down menu on A2. 
+Go back to the menu and click on “Create Jira Issue.” This should in fact create a Jira issue and there will be a prompt box that will say the issue key for the issue that was just created.
+
+How it Works:
+JiraCredentials.gs:
+This is where/how the script asks for your Jira credentials. It is called from the Menu and when you click on “Enter Jira Credentials,” an html dialog box opens up.
+The username and password that you enter are saved in the ScriptProperty as ‘Access.’ This will act as a global variable and this information will be deleted whenever you reopen the sheet. 
+CreateJira.gs
+This script file actually creates the Jira issues. It does it in 2 parts: createIssue() and callAPI()
+createIssue(): This method basically sets all of the variables/parameters needed to create a Jira ticket. The 3 variables it has to set are UserCredentials, IssueURL, and IssueData. UserCredentials and IssueURL should stay as is, but IssueData can be changed (If you want to change this variable, read the section “How to change/add more fields to Jira ticket”).
+callAPI(): This method takes in the 3 variables that were set in the createIssue() method and actually creates the Jira ticket. It will give a popup message with the key of the issue that was just created.
+
+How to change/add more fields to Jira ticket
+Set up of IssueData variable: 
+This is the variable that has all of the information that is needed to fill out the fields of a Jira ticket. The 4 required fields to fill out a Jira ticket are project, issue type, summary, and component/s. The issue type and summary for all of the Jira issues that will be created are preset. The project is dependent on the binary name that is selected on A2 cell in the “Summary” sheet. The project name runs through a bunch of if else statements and if it matches with one, the correct project information and its corresponding components will be added to the IssueData variable. 
+The bulk of the information that will be inputted in the Jira ticket is the information in the final analyzed table on the Summary sheet. This information will be stored in a temporary array and then it is combined into one string variable called desc. Then desc is stored in the IssueData variable in the appropriate format. 
+To add more projects:
+To add more projects, you need to add another if-else block in the createIssue() method. Following the set-up of the other if-else block, set IssueData.fields.project={“information from api goes here”}. 
+To get the information from the api, click on this link with the appropriate project key: https://jira.cloudera.com/rest/api/2/issue/createmeta?projectKeys=”project_key”
+In the blurb of information, the part to notice is the part at the top that starts with “projects”:[{“self”:...}, “issuetypes”:[{}], ...]. You will want to copy the information in the first element of that “projects” array. It will look something like {“self”:..., “id”:..., “key”:..., “name”:..., “avatarURLs”:...}. 
+To add more components
+To add to the components field (this will also be in the same if-else block as project), set IssueData.fields.components=[{“information from api goes here”}];
+To get the information from the api, click on this link with the appropriate project key and issue type, which is Bug: https://jira.cloudera.com/rest/api/2/issue/createmeta?projectKeys={project key}&issuetypeNames=Bug&expand=projects.issuetypes.fields
+In the blurb of information, the part to notice is the middle of the page that starts with “components”:{“required”:..., “schema”:{}, “name”:{}…, “allowedValues:”[{},{},{}...] } (use ctrl F and search “components”). You will want to copy the element in the “allowedValues” array that you want. It will look something like {“self”:..., “id”:..., “name”:...}.
+To change issuetype
+Following the set-up of the other if-else block, set IssueData.fields.project={“information from api goes here”}. 
+To get the information from the api, click on this link with the appropriate project key: https://jira.cloudera.com/rest/api/2/issue/createmeta?projectKeys=”project_key”
+In the blurb of information, the part to notice is the part at the top that starts with “projects”:[{“self”:...}, “issuetypes”:[{}, {}, ...]. You will want to copy the element in the “issuetypes” array that you want. It will look something like {“self”:..., “id”:..., “description”:..., “iconURL”:..., “name”:..., “subtask”:...}. 
+In general, use https://jira.cloudera.com/rest/api/2/issue/createmeta?projectKeys={project key}&issuetypeNames=Bug&expand=projects.issuetypes.fields to look for the information needed to add to the Jira fields and when in doubt, follow the style of the other fields.
+
+Errors:
+400 Error: You might get this error if you didn’t enter the fields correctly. The error should explain what the field needs to be. To fix it, compare what you wrote to the api.
+403 Authorization error: 
+This could mean that the user is using the wrong credentials. The user’s Okta account information is different from their Jira account information. If you don’t know what your Jira credentials are, file a helpdesk ticket and they will be able to help you out. 
+If this happens after you enter your jira credentials, and you know that they are correct, try waiting for a while. You might be timed out from accessing the API.
+401 Authentication error: This means that you might have entered your credentials incorrectly or you just opened the spreadsheet. Either way, click on the “Script Menu” menu, then click on “Enter Jira Credentials,” and then enter your username and password. 
+
+https://community.atlassian.com/t5/Jira-questions/Create-a-Jira-Issue-from-Google-Sheet/qaq-p/813161
+

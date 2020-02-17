@@ -1,0 +1,111 @@
+Getting Jira Reports to Google Sheets
+
+Introduction
+	Problem: 
+Jira has many functionalities when it comes to analyzing all of the issues, but it does not give you a lot of ways to customize how you want the analysis to be displayed. Google sheets on the other hand has a lot more options when it comes to creating tables and graphs. So how do you do Jira data analysis on Google sheets?
+	Solution: 
+I created a way to read information from the Jira API and display it on to Google Sheets. I set up 2 versions that both have this functionality.
+Which Version to Use?
+	Version 1 is more user friendly and it is easier to share the information you have to other people without worrying about them signing in to be able to see your analysis. However, one down side of this version are that if you change something in Jira, it will not automatically change in google sheets and you would have to enter all of the inputs again. Another downside is that it is very specific and it is not easy to change.
+	Version 2 is not as user friendly, but hopefully this information document will make everything more clear. Version 2 also allows for customization of a few things, which will be explained in the how the script works section.
+
+Integrating Jira with Google Sheets (Version 1)
+How the use the script:
+Create a copy of the template: https://docs.google.com/spreadsheets/d/1Ht0bd-OzyVHj9YuL01zXpTap47JGB4Slwyqow66T-KM/edit#gid=1918542778
+On the top of the spreadsheet, you will notice that there is a menu option called “Script Menu.” If you click on that you can see that there are 2 dropdown options. One is “Enter Jira Credentials,” which will prompt you to enter your Jira username and password. The second one is “Get Data,” which will prompt you to enter some parameters needed to get the data you want from Jira.
+Click on the “Script Menu” and click on the “Enter Jira Credentials,” enter your Jira username and password, and click “OK.”
+You might get a message that says “Authorization Required.” This means that the script has to be given access to your spreadsheets, so click accept and follow those instructions. 
+Then click on the “Get Data” option from the “Script Menu.” A message box will appear asking for some inputs, which are the parameters needed to import the specific data you want from Jira.
+The first one is Sheet, which is asking for what sheet you want the data to be displayed on. Make sure you type in the name of the sheet exactly. 
+The second and third parameters asking for the row and column of the cell you want the data to start at. The row will be a number and the column will be a letter.
+The fourth parameter is going to be the XPath for the script to follow to get the specific data you want from the api. 
+The fifth parameter is for the filter number.
+The sixth parameter is for where you want to start on the filter. Set it to 0 if you want all the data from the top.
+The seventh parameter is the maximum number of results you want to be displayed. Do not make the maximum bigger than 300, or else the data will not show up.
+The last parameter is Options and this is where you state how you want the data to be formatted. In general, set it to  noInherit, noTruncate. 
+After inputting all of that information, click “Ok.”
+Now everything should be properly set up the data you want should be displayed on the location you entered.
+If there are other errors, look below at some of the possible errors/solutions.
+If you change something in Jira, and need it to get update it on google sheets, you will have to do this entire process starting from step 4.
+
+How the Script works:
+If you want to learn more about how this all works and want to change things that make sense for you, click on Tools -> Script Editor. 
+GetData(): 
+This is the main function that is called when the user selects the option “Get Data” from the “Script Menu” to import the data from Jira to google sheets. This function has 7 parameters: sheet, row, col, filter, query, startAt, maxResults, option(s), which are filled when you enter the information in the form. 
+With the filter, startAt, and maxResults, the function creates a URL that links to the api. It will look something like this: https://jira.cloudera.com/rest/api/2/search?jql=filter=1234&startAt=0&maxResults=50 . If you open that link with the appropriate information in the URL, you will see the data that you can access in a JSON format. 
+The query that you enter is an XPath, which points to the information you want to get from that JSON file. There are a few paths listed below that the user can start with. The best way to figure out what the path to what you want is to look at the XML version of the filter or key. Then try to match it up with the api version. In this version, you can only type in one path, it might say otherwise in the script comments, but nothing will print out if you have multiple paths.
+Options is another parameter. This is where the user will state how they want the data to be formatted. The options that the user can pick from are noInherit, noTruncate, rawHeaders, debugLocation. NoInherit means that values from the parents will not show up. NoTruncate means that the values that are being printed out are not going to cut off if they are too long. RawHeader won’t make the header simplified. DebugLocation will prepend each value with the row and column it belongs in. If the user wants more than one option, then they can separate each option with a comma. The options should generally be noInherit, noTruncate. 
+Options, filter, query, the url variable that was just created, and a base64 encoded username and password are the parameters to call the ImportJSONAdvanced() function.
+ImoprtJSONAdvanced() will return an array that has all of the data that you want.
+Using the sheet name, row, col, and length of the array, this function will display all of the data in the array on to the spreadsheet.
+ImportJSONAdvanced(): 
+This function has 6 parameters, which are url, query, options, base64pw, includeXPath_(), and defaultTransformation_(). The options and query are the same as the GetData() parameters. Base64pw is the user’s username and password in the format username:password encoded in base 64. This variable is set when the user enters their Jira Credentials. includeXPath_() and defaultTransformation_() are both functions that are used to format the data. This function is used to fetch the URL with the encoded base64 authentication. It also calls the function that reads through all of the data.
+
+Integrating Jira with Google Sheets (Version 2)
+How to use the script:
+Create a copy of the template: https://docs.google.com/spreadsheets/d/1D6RbDYpmIs2nW_y8aoqac3nC9Kkup0WXQJM34pIDERA/edit#gid=771027525
+There are a few things to notice:
+You have 2 sheets, one called Input and one called Sheet1 (you can change the name of Sheet1, but not Input). Input will be populated with the information needed to get the data from Jira. Sheet1 is where the Jira data will be populated.
+On the top of the spreadsheet, there is a menu option called “Script Menu.” If you click on that you can see that there are 2 dropdown options. One is “Enter Jira Credentials,” which will prompt you to enter your Jira username and password. The second one is “Refresh,” which will update the data you are importing.
+Click on the “Script Menu” and click on the “Enter Jira Credentials.” You are prompted to enter your username and password.
+You might get a message that says “Authorization Required.” This means that the script has to be given access to your spreadsheets, so click accept and follow those instructions. 
+On the Input sheet, there are 8 cells that are filled out. The first column is just for labeling the parameters, and the information is in the second column, which are the parameters needed to import the specific data you want from Jira.
+The first one is Refresh, which is used to update the data that is being pulled from Jira. It displays the last time the refresh button was clicked. This should peramerter should always be in the upper leftmost cell, unless it is changed in the code. 
+The second parameter is Options and this is where you state how you want the data to be formatted. In general, it should always be noInherit, noTruncate. 
+The third parameter is going to be the XPath for the script to follow to get the specific data you want from the api.
+The fourth parameter will be the url to the api version of your filter. It should look something like this: https://jira.cloudera.com/rest/api/2/search?jql=filter=1234&maxResults=50
+Change the filter number to the filter you want.
+In the Options parameter, change the XPath to one that makes sense for what you want to display or you can leave it how it is, which will display the key of all of the issues of the filter.
+Now everything should be properly set up and you are ready to call the main function that will actually pull the data from Jira to your spreadsheet.
+If you didn’t move around the cells in the Input sheet, then sheet one should look like this: //=GetData(Input!B1,Input!B2,Input!B3,Input!B4)
+If you did move around the cells, just make sure that the Refresh cell (B1) is always in that spot. Make sure the second parameter is the cell with your options, the third cell is the cell with XPath, and the last parameter is the cell with your api url.
+Delete the 2 forward slashes in front of =GetData and now all of the data you want should be in a column. 
+If there are other errors, look below at some of the possible errors/solutions.
+If you change something in Jira, and need it to get update it on google sheets, there is a “Script Menu” that has a tab to refresh. Clicking the refresh tab should in fact refresh the data.
+
+How the script works:
+	If you want to learn more about how this all works and want to change things that make sense for you, click on Tools -> Script Editor. The main functions that you should understand: refresh(), GetData(), and ImportJSONAdvanced().
+refresh(): This function is what is called when you click on the Refresh tab that is in the Script Menu indicating that you want the data to be updated. This function returns the current date and time on B1 cell of the Input sheet. This cell will also be a parameter for the GetData() function. The reason for this is if you change something in the filter in Jira, the physical URL won’t change, so google sheets won’t think that anything changed and it won’t run the GetData() function again. Having the current time will be the physical change that google sheets is looking for.
+GetData(): This is the main function that the user will call to import the data from Jira to google sheets. This function has 4 parameters: url, path(s), option(s), current time. 
+The URL is the link to the api. If the user wants to import a filter follow this template: https://jira.cloudera.com/rest/api/2/search?jql=filter=1234&maxResults=50 . If you click on this link, all of that data that you can access is in a JSON format. 
+To get specific information, write XPaths, which is the second parameter. There are a few paths below that the user can start with. The best way to figure out what the path to what you want is to look at the XML version of the filter or key. Then try to match it up with the api version. If there are multiple paths the user wants to import, they can use a comma to separate the paths and the data will be separated into different columns for each path. 
+Options is the third parameter. This is where the user will state how they want the data to be formatted. The options that the user can pick from are noInherit, noTruncate, rawHeaders, debugLocation. NoInherit means that values from the parents will not show up. NoTruncate means that the values that are being printed out are not going to cut off if they are too long. RawHeader won’t make the header simplified. DebugLocation will prepend each value with the row and column it belongs in. If the user wants more than one option, then they can separate each option with a comma. The options should generally be noInherit, noTruncate.
+ The last parameter is going to be the current time, which is used for refreshing the data. The only thing in this function is a call to ImportJSONAdvanced(). 
+	ImportJSONAdvanced(): This function has 6 parameters, which are url, query, base64pw, includeXPath_(), and defaultTransformation_(). The url and query are the same as the GetData() parameters. Base64pw is the user’s username and password in the format username:password encoded in base 64. This variable is set when the user enters their Jira Credentials. includeXPath_() and defaultTransformation_() are both functions that are used to format the data. This function is used to fetch the URL with the encoded base64 authentication. It also calls the function that prints out all of the data.
+
+Useful Information for Both Versions
+
+Some Common Paths:
+Path to get Issue Key: /issues/key
+Path to get the total number of results: /total
+Path to get the Target Version of an Issue: /issues/fields/customfield_10815/name
+Path to get the Component of an Issue: /issues/fields/components/name
+Path to get the assignee of an Issue: /issues/fields/assignee/name
+
+Some Common Errors:
+	Error! (Internal custom function): This could mean a multitude of things, but one thing it could mean is that google sheets is referencing multiple cells. To fix this, try reducing the maxResults. If still nothing shows up and the same error is produced, then the problem is something else.
+	403 Authorization error: 
+This could mean that the user is using the wrong credentials. The user’s Okta account information is different from their Jira account information. If you don’t know what your Jira credentials are, file a helpdesk ticket and they will be able to help you out. 
+If this happens after you enter your jira credentials, and you know that they are correct, try waiting for a while. You might be timed out from accessing the API.
+	401 Authentication error: This means that you might have entered your credentials incorrectly or you just opened the spreadsheet. Either way, click on the “Script Menu” menu, then click on “Enter Jira Credentials,” and then enter your username and password. 
+
+Custom Methods:
+	Sub_array(input): This function takes in a column as its parameter and it will return a 2-column array that finds unique values and returns the subtotals of those unique values.
+
+Things to Improve:
+Find a way to merge the 2 versions that will allow them to be more useful for the user.
+The program gets overloaded when trying to print more than 300 things. There might be a way to address this issue.
+If there is a list of things that need to be printed out (e.g. like if there are multiple target versions for one issue), the script currently only prints out all of the elements in different cells. Adding a function to print everything in a list separated by commas is a possible solution to this problem.
+Create more custom functions like sub_array() that can do things that jira cannot do properly. 
+Create different graphs and tables with the data maybe using the custom functions
+Try different type of authentication
+
+Credits:
+https://medium.com/@paulgambill/how-to-import-json-data-into-google-spreadsheets-in-less-than-5-minutes-a3fede1a014a
+http://www.littlebluemonkey.com/blog/automatically-import-jira-backlog-into-google-spreadsheet
+https://stackoverflow.com/questions/36225756/adding-password-type-to-google-apps-script-inputbox
+https://community.atlassian.com/t5/Jira-questions/Create-a-Jira-Issue-from-Google-Sheet/qaq-p/813161
+
+
+To look at just one issue: https://jira.cloudera.com/rest/api/2/issue/CB-3196
+
